@@ -1,0 +1,15 @@
+<app-dashboard-tile [headerContent]="'Server Status'" [imgAlt]="'A signal symbol'" [imgSrc]="'status.png'">
+    <div id="status">
+        <p [class]="getCurrentClass()">{{ getCurrentConfig().p1 }}</p>
+        <!-- We can achive the same as above, but using syntax below -->
+        <!--  We can use the same for [style] !!! -->
+        <!-- <p [class]="{
+            status: true,
+            'status-online': currentStatus === 'online',
+            'status-offline':  currentStatus === 'offline',
+            'status-unknown': isStatusUnknown()
+        }">{{ getCurrentConfig().p1 }}</p> -->
+        <p>{{ getCurrentConfig().p2 }}</p>
+        
+    </div>
+</app-dashboard-tile>

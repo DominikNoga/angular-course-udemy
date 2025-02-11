@@ -1,0 +1,36 @@
+@if (displayAddTask) {
+    <div class="backdrop" (click)="hideAddTask()"></div>
+}
+<dialog [open]="displayAddTask">
+    <form (submit)="createNewTask()">
+        <div class="form-group">
+            <label for="title">Title</label>
+            <input 
+                type="text" 
+                name="title" 
+                id="title" 
+                [(ngModel)]="newTask.title">
+        </div>
+        <div class="form-group">
+            <label for="summary">Summary</label>
+            <textarea 
+                name="summary" 
+                id="summary" 
+                [(ngModel)]="newTask.summary">
+            </textarea>
+        </div>
+        <div class="form-group">
+            <label for="dueDate">Due date</label>
+            <input 
+                type="date" 
+                name="dueDate" 
+                id="dueDate" 
+                [(ngModel)]="newTask.dueDate">
+        </div>
+        <div class="actions">
+            <button type="button" (click)="hideAddTask()">Cancel</button>
+            <button type="submit">Add</button>
+        </div>
+            
+    </form>
+</dialog>

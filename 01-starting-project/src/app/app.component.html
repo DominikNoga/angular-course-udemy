@@ -1,0 +1,9 @@
+<app-header></app-header>
+<main>
+    <app-users-list [users]="users" (userSelected)="updateUserTasks($event)"></app-users-list>
+    @if (selectedUserDefined()) {
+        <app-task-list [user]="selectedUser()!"></app-task-list>
+    } @else {
+        <h1>Select user to display his tasks</h1>
+    }
+</main>

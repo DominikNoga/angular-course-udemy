@@ -1,0 +1,8 @@
+<ul id="users">
+    <li *ngFor="let user of users">
+        <app-user-tile 
+            [selected]="selectedUserId === user.id"
+            (onUserSelected)="onUserClicked($event)" 
+            [user]="user"></app-user-tile>
+    </li>
+</ul>

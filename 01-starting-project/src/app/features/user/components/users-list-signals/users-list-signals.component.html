@@ -1,0 +1,10 @@
+<ul id="users">
+    <!-- New for loop in Angular -->
+    <!-- What track does? If something is changed in one item. 
+        Angular can easily recognize which item has to be updated efficiently because whole list does not have to be rerendered -->
+    @for (user of users; track user.id) {
+        <li>
+            <app-user-tile-signal [user]="user" (onUserSelect)="onUserSelect($event)"></app-user-tile-signal>
+        </li>
+    }
+</ul>

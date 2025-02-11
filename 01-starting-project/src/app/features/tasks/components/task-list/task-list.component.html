@@ -1,0 +1,26 @@
+<section id="tasks">
+    <header>
+        <h2>{{ user().name }}'s Tasks</h2>
+        <menu>
+            <button (click)="toggleAddTask()">
+                Add Task
+            </button>
+        </menu>
+    </header>
+    @if (addTaskToggled) {
+        <app-add-task (onHideAddTask)="toggleAddTask()" [userId]="user().id"></app-add-task>
+    }
+    <ul>
+        @if (userTasks().length) {
+        @for (task of selectedUserTasks; track task.id) {
+        <li>
+            <app-task [task]="task" (onTaskComplete)="onTaskComplete($event)" />
+        </li>
+        }
+        } @else {
+        <li>
+            <h1>This user has not added any tasks yet</h1>
+        </li>
+        }
+    </ul>
+</section>

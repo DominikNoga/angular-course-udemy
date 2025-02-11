@@ -24,7 +24,7 @@ export class FormControlComponent {
   private hostElement = inject(ElementRef); // we are getting access to the host element of our component
 
   onHostClick() {
-    console.log('Host clicked');
-    console.log(this.hostElement);
+    // console.log('Host clicked');
+    // console.log(this.hostElement);
   }
 }

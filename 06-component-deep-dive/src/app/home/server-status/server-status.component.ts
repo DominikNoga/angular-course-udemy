@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { SERVER_STATUS } from '../home-page.constants';
 import { DashboardTileComponent } from "../dashboard-tile/dashboard-tile.component";
 
@@ -11,8 +11,9 @@ type ServerConfigProp = 'online' | 'offline' | 'unknown';
   templateUrl: './server-status.component.html',
   styleUrl: './server-status.component.css'
 })
-export class ServerStatusComponent implements OnInit {
+export class ServerStatusComponent implements OnInit, OnDestroy {
   currentStatus: string = SERVER_STATUS.ONLINE;
+  private interval?: ReturnType<typeof setInterval>; // it is type of what will be returned by setInterval
   serverStatusConfig = {
     online: {
       p1: 'Servers are online',
@@ -29,12 +30,17 @@ export class ServerStatusComponent implements OnInit {
   };
 
   ngOnInit(): void {
-    setInterval(() => {
+    this.interval = setInterval(() => {
       const random = Math.floor(Math.random() * 1_000_000);
       if (this.currentStatus !== SERVER_STATUS.ONLINE) this.currentStatus = SERVER_STATUS.ONLINE;
       if (random % 10 === 0) this.currentStatus = SERVER_STATUS.OFFLINE;
       if (random % 100 === 0) this.currentStatus = 'aaa';
     }, 1000);
+  }
+
+  ngOnDestroy(): void {
+    // it will remove timeout when the component is removed from DOM
+    clearInterval(this.interval);
   }
 
   getCurrentConfig = () => this.serverStatusConfig[this.getCurrentStatus() as ServerConfigProp];

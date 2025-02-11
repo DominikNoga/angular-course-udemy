@@ -60,3 +60,24 @@ We can use multiple ng content if we will assign a select property to one of the
     <ng-content select="input, textarea"></ng-content>
 </p>
 ````
+
+## Forms
+### Template variables
+````html
+<form (ngSubmit)="onSubmit(titleInput, requestInput)">
+    <app-form-control label="Title">
+      <!-- #titleInput creates a variable of type HTMLInputElement, and we can pass it to onSubmit and extract the value -->
+      <!-- If we do not need to update the value live it is good solution  -->
+        <input name="title" id="title" #titleInput />
+    </app-form-control>
+    <app-form-control label="Request">
+        <textarea name="request" id="request" rows="3" #requestInput></textarea>
+    </app-form-control>
+    <p>
+        <button appButton>
+            Submit
+            <span class="icon">⌲</span>
+        </button>
+    </p>
+</form>
+````

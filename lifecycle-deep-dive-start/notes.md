@@ -39,4 +39,32 @@ Actions that happen at some specific moment of a component live cycle.
     - runs when we detect changes in the template
     - rarely used
 
-- ngOnDestroy -> component is removed from DOM, for example it is rendered conditionally
+- ngOnDestroy 
+    - component is removed from DOM, for example it is rendered conditionally
+    - ALTERNATIVE: DestroyRef -> from Angular 16 -> Advantage is that we can use it in services, and can be used multiple times
+    ````ts
+    @Component({
+  selector: 'app-traffic-chart',
+  standalone: true,
+  imports: [DashboardTileComponent],
+  templateUrl: './traffic-chart.component.html',
+  styleUrl: './traffic-chart.component.css'
+    })
+    export class TrafficChartComponent implements OnInit {
+        trafficData = input.required<TrafficData>();
+        maxTraffic!: number;
+        // this can be used instad of ngOnDestroy
+        private destroyRef = inject(DestroyRef);
+
+        ngOnInit(): void {
+            this.maxTraffic = Math.max(...this.trafficData().map((data) => data.value));
+            const interval = setInterval(() => {
+            console.log('some interval');
+            }, 1_000_000);
+
+            this.destroyRef.onDestroy(() => {
+            clearInterval(interval);
+            });
+        }
+    }
+    ````

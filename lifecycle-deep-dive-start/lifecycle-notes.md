@@ -23,6 +23,7 @@ Actions that happen at some specific moment of a component live cycle.
 - ngAfterContentInit
     - content is everything that can be projected to the component with ng-content
     - we can access the content that is projected
+    - here you can access the contentChild value
     - rarely used
 
 - ngAfterContentChecked
@@ -33,6 +34,7 @@ Actions that happen at some specific moment of a component live cycle.
     - view is an element HTML template, so this is what is rendered to the DOM
     - it refers to the whole html template for our component
     - runs when we render the component to our DOM 
+    - here we can access viewChild content
     - rarely used
 
 - ngAfterViewChecked
@@ -68,3 +70,28 @@ Actions that happen at some specific moment of a component live cycle.
         }
     }
     ````
+
+## AfterRender, AfterNextRender
+Hooks defined in the controller that allows running some code after each re-render in the application.
+Or once per every component render
+
+````ts
+class RenderExample {
+    constructor() {
+    afterRender(() => {
+      // It happens after any changes in the whole Angular application
+      // Any re-render in any component will cause this function running
+      // Useful for continous updates after each render
+      console.log('after render')
+    });
+
+    afterNextRender(() => {
+      // This also runs for the whole application, but it will run only for the first component render
+      // useful for third party UI elements initialization
+      // JUST once per component instance
+      console.log('after next render');
+    })
+  }
+}
+
+````

@@ -1,8 +1,8 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, effect, OnDestroy, OnInit, signal } from '@angular/core';
 import { SERVER_STATUS } from '../home-page.constants';
 import { DashboardTileComponent } from "../dashboard-tile/dashboard-tile.component";
 
-type ServerConfigProp = 'online' | 'offline' | 'unknown';
+type ServerStatus = 'online' | 'offline' | 'unknown';
 
 @Component({
   selector: 'app-server-status',
@@ -12,7 +12,8 @@ type ServerConfigProp = 'online' | 'offline' | 'unknown';
   styleUrl: './server-status.component.css'
 })
 export class ServerStatusComponent implements OnInit, OnDestroy {
-  currentStatus: string = SERVER_STATUS.ONLINE;
+  readonly SEED = 1000;
+  currentStatus = signal<ServerStatus>(SERVER_STATUS.ONLINE);
   private interval?: ReturnType<typeof setInterval>; // it is type of what will be returned by setInterval
   serverStatusConfig = {
     online: {
@@ -29,12 +30,21 @@ export class ServerStatusComponent implements OnInit, OnDestroy {
     }
   };
 
+  constructor() {
+    effect((onCleanup) => {
+      console.log(`status has changed to: ${this.currentStatus()}`);
+      onCleanup(() => {
+        // Do some cleanup
+      })
+    })
+  }
+
   ngOnInit(): void {
     this.interval = setInterval(() => {
-      const random = Math.floor(Math.random() * 1_000_000);
-      if (this.currentStatus !== SERVER_STATUS.ONLINE) this.currentStatus = SERVER_STATUS.ONLINE;
-      if (random % 10 === 0) this.currentStatus = SERVER_STATUS.OFFLINE;
-      if (random % 100 === 0) this.currentStatus = 'aaa';
+      const random = Math.floor(Math.random() * 1_000_0);
+      if (this.currentStatus() !== SERVER_STATUS.ONLINE) this.currentStatus.set(SERVER_STATUS.ONLINE);
+      if (random % this.SEED === 0) this.currentStatus.set(SERVER_STATUS.OFFLINE);
+      if (random % this.SEED * 5 === 0) this.currentStatus.set(SERVER_STATUS.UNKNOWN);
     }, 1000);
   }
 
@@ -43,11 +53,7 @@ export class ServerStatusComponent implements OnInit, OnDestroy {
     clearInterval(this.interval);
   }
 
-  getCurrentConfig = () => this.serverStatusConfig[this.getCurrentStatus() as ServerConfigProp];
+  getCurrentConfig = () => this.serverStatusConfig[this.currentStatus()];
 
-  getCurrentClass = () => `status-${this.getCurrentStatus()}`;
-
-  getCurrentStatus = (): string => this.isStatusUnknown() ? 'unknown' : this.currentStatus; 
-
-  isStatusUnknown = (): boolean => this.currentStatus !== SERVER_STATUS.OFFLINE && this.currentStatus !== SERVER_STATUS.ONLINE;
+  getCurrentClass = () => `status-${this.currentStatus()}`;
 }

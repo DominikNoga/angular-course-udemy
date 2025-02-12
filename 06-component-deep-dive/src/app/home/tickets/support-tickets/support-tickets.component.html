@@ -1,5 +1,19 @@
 <app-dashboard-tile [headerContent]="'Support Tickets'" [imgAlt]="'A list of items'" [imgSrc]="'list.png'">
+    <div>
+        <ul>
+            @for (ticket of tickets; track ticket.id) {
+                <li>
+                    <app-ticket [ticket]="ticket"></app-ticket>
+                </li>
+            } @empty {
+                <p>
+                    No tickets available
+                </p>
+            }
+        </ul>
+    </div>
+    
     <div id="new-ticket">
-        <app-new-ticket></app-new-ticket>
+        <app-new-ticket (onTicketAdd)="onTicketAdd($event)"></app-new-ticket>
     </div>
 </app-dashboard-tile>

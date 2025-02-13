@@ -2,7 +2,7 @@ import { Component, ElementRef, AfterViewInit, viewChild, ViewChild, ViewChildre
 import { ButtonComponent } from "../../../shared/button/button.component";
 import { FormControlComponent } from "../../../shared/form-control/form-control.component";
 import { FormsModule } from '@angular/forms';
-import { Ticket, TICKET_STATUS } from '../tickets.model';
+import { NewTicketDto, Ticket, TICKET_STATUS } from '../tickets.model';
 
 
 @Component({
@@ -17,6 +17,10 @@ export class NewTicketComponent implements AfterViewInit, OnInit {
   @ViewChildren(ButtonComponent) buttons?: ElementRef<ButtonComponent>[];
   private form2 = viewChild.required<ElementRef<HTMLFormElement>>('form'); // Available since Angular 17.3
   onTicketAdd = output<Ticket>();
+  newTicketData: NewTicketDto = {
+    title: '',
+    request: ''
+  };
 
   ngOnInit(): void {
     // This will be undefined
@@ -32,6 +36,21 @@ export class NewTicketComponent implements AfterViewInit, OnInit {
     console.log('After view Init')
     console.log(this.buttons);
     console.log(this.form);
+  }
+
+  onSubmitWithNgModel() {
+    const id = (Math.floor(Math.random() * 10000000)).toString();
+    const newTicket: Ticket = {
+      id: id,
+      status: Number(id) % 2 ? TICKET_STATUS.OPEN : TICKET_STATUS.CLOSED,
+      ...this.newTicketData
+    };
+
+    this.onTicketAdd.emit(newTicket);
+    console.log(newTicket);
+    // this.form?.nativeElement.reset();
+    // this is exactly the same as the above, but using signals
+    this.form2().nativeElement.reset();
   }
 
   onSubmit(titleElement: HTMLInputElement, requestElement: HTMLTextAreaElement) {

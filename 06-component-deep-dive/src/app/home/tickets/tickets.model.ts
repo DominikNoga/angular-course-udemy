@@ -11,3 +11,8 @@ export type Ticket = {
     request: string;
     status: TicketStatus;
 };
+
+export type NewTicketDto = {
+    title: string;
+    request: string;
+};

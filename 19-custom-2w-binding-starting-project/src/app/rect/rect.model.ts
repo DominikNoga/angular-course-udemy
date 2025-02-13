@@ -1,0 +1,1 @@
+export type Rect = { width: string; height: string }; 

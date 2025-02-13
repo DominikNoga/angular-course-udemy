@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { DashboardTileComponent } from "../../dashboard-tile/dashboard-tile.component";
 import { NewTicketComponent } from '../new-ticket/new-ticket.component';
-import { Ticket } from '../tickets.model';
+import { Ticket, TICKET_STATUS } from '../tickets.model';
 import { TicketComponent } from "../ticket/ticket.component";
 
 @Component({
@@ -17,5 +17,14 @@ export class SupportTicketsComponent {
   onTicketAdd(newTicket: Ticket) {
     this.tickets.push(newTicket);
     console.log(this.tickets)
+  }
+
+  onTicketComplete(ticketId: string) {
+    this.tickets = this.tickets.map(ticket => {
+      if (ticket.id === ticketId) {
+        ticket.status = TICKET_STATUS.CLOSED;
+      }
+      return ticket;
+    });
   }
 }

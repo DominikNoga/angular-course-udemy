@@ -62,3 +62,83 @@ export class SafeLinkDirective {
 }
 
 ````
+
+### Custom structural directives
+A structural directive changes the structure of the DOM. For example renders an element conditionally
+In order to add this directive to the element we can follow 2 paths:
+````html
+  <!-- The '*' symbol automatically wraps the element with the ng-template -->
+   <p *appAuth="PERMISSIONS.GUEST" class="protected-content unauthenticated">
+    Guests should see this
+  </p>
+
+  <!-- WILL work the same as with the '*' symbol, it needs to be added with ng-template in order to work properly -->
+  <ng-template [appAuth]="PERMISSIONS.ADMIN">
+    <p>
+      Only for admin
+    </p>
+  </ng-template>
+````
+
+In order to manipulate the DOM we need inject 2 things into our directive:
+- TemplateRef -> Reference to the content of the <ng-template> which wraps the content, that we attach the directive to
+- ViewContainerRef -> It marks the place in the DOM which will be affected by the directive
+
+````ts
+export class AuthDirective {
+  userType = input.required<Permission>({
+    alias: 'appAuth'
+  });
+  private authService = inject(AuthService);
+  // it references the content of a ng-template element which wraps the content affected by our directive
+  private templateRef = inject<TemplateRef<HTMLElement>>(TemplateRef);
+  // it references the place in the DOM where the directive is applied
+  private viewContainerRef = inject<ViewContainerRef>(ViewContainerRef);
+
+  constructor() {
+    effect(() => {
+      if (this.authService.activePermission() === this.userType()) {
+        // We are creating the view for our template
+        this.viewContainerRef.createEmbeddedView(this.templateRef);
+      } else {
+        // Clear the view, and remove it from the DOM
+        this.viewContainerRef.clear();
+      }
+    });
+  }
+}
+````
+
+### Adding directive to the hostElement
+We can add directive to the whole component/directive, by using the hostDirectives property of the @Component or even @Directive decorators
+
+Directive definition: It will log the host, each time it is clicked
+````ts
+@Directive({
+  selector: '[appLog]',
+  standalone: true,
+  host: {
+    '(click)': 'onLog()'
+  }
+})
+export class LogDirective {
+  private hostElementRef = inject<ElementRef>(ElementRef);
+
+  onLog = () => {
+    console.log('Element clicked:', this.hostElementRef.nativeElement);
+  };
+}
+````
+
+Now we can add this directive the whole component without unnecesseary repetitions
+````ts
+@Component({
+  selector: 'app-learning-resources',
+  templateUrl: './learning-resources.component.html',
+  styleUrl: './learning-resources.component.css',
+  imports: [SafeLinkDirective],
+  standalone: true,
+  hostDirectives: [LogDirective] // All elements in our template will have this assigned
+})
+export class LearningResourcesComponent {}
+````

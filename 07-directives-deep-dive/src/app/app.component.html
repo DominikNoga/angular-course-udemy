@@ -5,7 +5,22 @@
 
   <app-auth />
 
-  <p *ngIf="isAdmin()">
+  <p *appAuth="PERMISSIONS.ADMIN" class="protected-content admin">
     Only for admin
   </p>
+
+  <p *appAuth="PERMISSIONS.USER" class="protected-content authenticated">
+    Non Admin users should see this
+  </p>
+
+  <p *appAuth="PERMISSIONS.GUEST" class="protected-content unauthenticated">
+    Guests should see this
+  </p>
+
+  <!-- WILL work the same as with the asterisc, it needs to be added with ng-template in order to work properly -->
+  <!-- <ng-template [appAuth]="PERMISSIONS.ADMIN">
+    <p>
+      Only for admin
+    </p>
+  </ng-template> -->
 </main>

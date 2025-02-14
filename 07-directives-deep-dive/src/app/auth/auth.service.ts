@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 
-import { Permission } from './auth.model';
+import { Permission, PERMISSIONS } from './auth.model';
 
 @Injectable({
   providedIn: 'root',
@@ -11,15 +11,15 @@ export class AuthService {
   authenticate(email: string, password: string) {
     console.log(email, password);
     if (email === 'admin@a.com' && password === 'admin') {
-      this.activePermission.set('admin');
-    } else if (email === 'user@example.com' && password === 'user') {
-      this.activePermission.set('user');
+      this.activePermission.set(PERMISSIONS.ADMIN);
+    } else if (email === 'user@u.com' && password === 'user') {
+      this.activePermission.set(PERMISSIONS.USER);
     } else {
-      this.activePermission.set('guest');
+      this.activePermission.set(PERMISSIONS.GUEST);
     }
   }
 
   logout() {
-    this.activePermission.set('guest');
+    this.activePermission.set(PERMISSIONS.GUEST);
   }
 }

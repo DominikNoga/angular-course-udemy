@@ -1,0 +1,19 @@
+<header>
+  <h2>My Tasks</h2>
+  <p>
+    
+    <select (change)="onChangeTasksFilter()" [(ngModel)]="selectedFilter" #filter>
+      @for (filterOption of TASK_FILTER_OPTIONS; track filterOption.value) {
+        <option [value]="filterOption.status">{{ filterOption.label }}</option>
+      }
+    </select>
+  </p>
+</header>
+
+<ul>
+  @for (task of tasks(); track task.id) {
+    <li>
+      <app-task-item [task]="task" />
+    </li>
+  }
+</ul>

@@ -1,3 +1,5 @@
+import { InjectionToken, ValueProvider } from "@angular/core";
+
 export const TASK_STATUS = {
   OPEN: 'OPEN',
   IN_PROGRESS: 'IN_PROGRESS',
@@ -34,7 +36,7 @@ export const TASK_STATUS_INPUT = [
   }
 ] as const;
 
-export const TASK_FILTER_OPTIONS = [
+export const TaskFilterOptions = [
 
   ...TASK_STATUS_INPUT,
   {
@@ -43,6 +45,13 @@ export const TASK_FILTER_OPTIONS = [
     status: 'all'
   }
  ] as const;
+
+export const TASK_FILTER_OPTIONS = new InjectionToken<typeof TaskFilterOptions>('task-filter-options');
+
+export const TaskFilterOptionsProvider: ValueProvider = {
+  provide: TASK_FILTER_OPTIONS,
+  useValue: TaskFilterOptions
+}
 
 export type TaskStatus = typeof TASK_STATUS[keyof typeof TASK_STATUS];
 

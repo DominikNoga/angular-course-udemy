@@ -1,8 +1,8 @@
-import { Component, computed, Signal, signal } from '@angular/core';
+import { Component, computed, inject, Signal, signal } from '@angular/core';
 
 import { TaskItemComponent } from './task-item/task-item.component';
 import { TasksService } from '../utils/tasks.service';
-import { Task, TASK_FILTER_OPTIONS, TaskFilterStatus, TaskStatus } from '../task.model';
+import { Task, TASK_FILTER_OPTIONS, TaskFilterOptionsProvider, TaskFilterStatus } from '../task.model';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -11,12 +11,13 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './tasks-list.component.html',
   styleUrl: './tasks-list.component.css',
   imports: [TaskItemComponent, FormsModule],
+  providers: [TaskFilterOptionsProvider]
 })
 export class TasksListComponent {
   selectedFilter: TaskFilterStatus = 'all';
   private filterSignal = signal<TaskFilterStatus>(this.selectedFilter);
   tasks: Signal<Task[]>;
-  readonly TASK_FILTER_OPTIONS = TASK_FILTER_OPTIONS;
+  readonly TASK_FILTER_OPTIONS = inject(TASK_FILTER_OPTIONS);
 
   constructor(private tasksService: TasksService) {
     this.tasks = computed(() =>{

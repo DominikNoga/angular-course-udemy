@@ -101,3 +101,57 @@ export class MessagesListComponent implements OnInit{
 }
 
 ````
+
+- Async pipe: 
+    - The previous code was quite long, in order to make it simpler we can use an async pipe
+    - This will setup the subscription and clear it after that and run the change detection mechanism
+    - It is useful only when we are just displaying those items, but when we need to perform some operations we need longer approach
+````ts
+@Component({
+  selector: 'app-messages-list',
+  standalone: true,
+  imports: [AsyncPipe],
+  templateUrl: './messages-list.component.html',
+  styleUrl: './messages-list.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class MessagesListComponent {
+  private messageService = inject(MessagesService);
+  messages: string[] = [];
+  messages$ = this.messageService.messages$; // We are just assigning the BehaviorSubject from service to the variable
+}    
+````
+
+````html
+<ul>
+  <!-- Thanks to using the async pipe we can setup the subscription, it will be automatically removed when component is destroyed. 
+       And it will run change detection mechanism, when the subject changes.
+    -->
+  @for (message of messages$ | async; track message) {
+    <li>{{ message }}</li>
+  }
+</ul>
+
+<p class="debug-output">{{ debugOutput }}</p>
+
+````
+
+## Going zoneless
+Source: https://angular.dev/guide/experimental/zoneless
+Source 2: Lecture 203 -> https://www.udemy.com/course/the-complete-guide-to-angular-2/learn/lecture/44116190#questions/22233979
+- Signals are features provided by Angular
+- Event binding is feature provided by Angular
+- Therfore it knows about them changing without zone.js
+- Since version 18 we can remove zone.js
+- It will improve the perf, and code bundle size
+- It will remove more under the hood operations
+- For now it is just for the tets purposes, and experimental, and may change
+<br />
+<br />
+<b> How changes are detected?</b>
+
+- ChangeDetectorRef.markForCheck (called automatically by AsyncPipe)
+- ComponentRef.setInput
+- Updating a signal that's read in a template
+- Bound host or template listeners callbacks
+- Attaching a view that was marked dirty by one of the above

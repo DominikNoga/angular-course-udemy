@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MessagesService } from '../messages.service';
+import { MessageSignalService } from '../messages-signal.service';
 
 @Component({
   selector: 'app-new-message',
@@ -13,6 +14,7 @@ import { MessagesService } from '../messages.service';
 export class NewMessageComponent {
   enteredText = signal('');
   private messagesService = inject(MessagesService);
+  private messagesSignalService = inject(MessageSignalService);
 
   get debugOutput() {
     console.log('[NewMessage] "debugOutput" binding re-evaluated.');
@@ -21,6 +23,7 @@ export class NewMessageComponent {
 
   onSubmit() {
     this.messagesService.addMessage(this.enteredText());
+    this.messagesSignalService.addMessage('SIGNAL SERVICE: ' + this.enteredText());
     this.enteredText.set('');
   }
 }

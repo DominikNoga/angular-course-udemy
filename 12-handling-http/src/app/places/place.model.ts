@@ -8,3 +8,8 @@ export interface Place {
   lat: number;
   lon: number;
 }
+
+export type UserPlaceDTO = {
+  placeId: string;
+
+}

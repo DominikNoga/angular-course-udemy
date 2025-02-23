@@ -58,6 +58,37 @@ const sub = interval(2000)
       );
 ````
 
+### Useful operators
+- map -> perform some kind of modification on the data stream
+- filter -> just like array filter
+- tap -> more here (https://blog.angulartraining.com/three-reasons-to-use-the-tap-operator-from-rxjs-6828fcf288ec)
+  - log the data (debug)
+  - apply side effects
+  - get notified when other observable is done
+- switchMap -> more here (https://www.angulartraining.com/daily-newsletter/rxjs-switchmap-operator/)
+  - allows to handle the nested subscriptions
+  - handles autmatic unsub to all observables that should be unsubscribed
+  ````ts
+  class TestService {
+    constructor(private http: HttpClient) {
+        this.subscription = timer(0, 3000) //Emits a value now and then every 30 seconds
+          .pipe(
+            switchMap(() => this.getRatesFromApi()), // Change that value into an API call
+            map((rate) => {
+              for (let key in rate) {
+                rate[key] = rate[key] * Math.random();
+              }
+              return rate;
+            }),
+            tap(console.log) // Logging the result for debugging purposes
+          )
+          .subscribe((rates: Rates) => this.rates$.next(rates)); // Emit new values using our Subject
+        }
+  }
+  ````
+- combineLatest - more here (https://www.angulartraining.com/daily-newsletter/rxjs-combinelatest-operator/)
+  - combine several observables output
+
 ## Signlas vs Observables
 - Singlas have an initial values, observables don't
 - Observable will only trigger when it has at least one subscriber

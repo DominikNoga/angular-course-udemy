@@ -23,6 +23,7 @@ export class AvailablePlacesComponent implements OnInit {
           console.log(error);
           return throwError(() => new Error('something went wrong')); // the handled error is gone, so we need to throw it again if we want to use it in error function
           // useful if we want to have two separate logics for this error handling
+          // useful when we want to return a different data when something failed (for example cached one)
         })
       )
       .subscribe({

@@ -3,7 +3,7 @@ import { Injectable, signal } from '@angular/core';
 import { Permission, PERMISSIONS } from './auth.model';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class AuthService {
   activePermission = signal<Permission>('guest');

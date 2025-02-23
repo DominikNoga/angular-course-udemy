@@ -86,6 +86,26 @@ export class UserTileSignalComponent {
     </ng-template>
   ````
 
+  - @let -> Allows to declare variables in a template
+  ````html
+    @let user = app.obj.user
+
+    Address: {{user.address}}
+    Name: {{user.name}}
+  ````
+
+  - @switch -> Instead of ngSwitch
+  ````html
+    @switch (userPermissions) {
+      @case ('admin') {
+        <app-admin-dashboard />
+      }
+      @default {
+        <app-viewer-dashboard />
+      }
+    }
+  ````
+
 ### Two way data binding
 - It works like that, when we write into the input, the value is updated right away
 - Live changes of the variable. To add it you have to wrap a directive with [()]

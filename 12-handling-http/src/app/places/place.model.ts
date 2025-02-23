@@ -11,5 +11,8 @@ export interface Place {
 
 export type UserPlaceDTO = {
   placeId: string;
-
 }
+
+export type UserPlacesResponse = {
+  userPlaces: Place[];
+};

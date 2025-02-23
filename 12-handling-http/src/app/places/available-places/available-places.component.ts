@@ -1,10 +1,8 @@
 import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
-
-import { Place, UserPlaceDTO } from '../place.model';
+import { Place } from '../place.model';
 import { PlacesComponent } from '../places.component';
 import { PlacesContainerComponent } from '../places-container/places-container.component';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { catchError, map, throwError } from 'rxjs';
+import { PlacesService } from '../places.service';
 
 @Component({
   selector: 'app-available-places',
@@ -14,27 +12,16 @@ import { catchError, map, throwError } from 'rxjs';
   imports: [PlacesComponent, PlacesContainerComponent],
 })
 export class AvailablePlacesComponent implements OnInit {
-  httpClient = inject(HttpClient);
+  placesService = inject(PlacesService);
   places = signal<Place[] | undefined>(undefined);
   isFetching = signal(false);
   private destroyRef = inject(DestroyRef);
 
   ngOnInit(): void {
     this.isFetching.set(true);
-    const sub = this.httpClient.get<{places: Place[]}>('http://localhost:3000/places', {
-      observe: 'body', // response (fullResponse object) | body (just response body) | events (all events that occur during the request sending and response receiving)
-    })
-      .pipe(
-        map((response) => response.places),
-        catchError((error) => { // We can catch error here, do sth with it
-          console.log(error);
-          return throwError(() => new Error('something went wrong')); // the handled error is gone, so we need to throw it again if we want to use it in error function
-          // useful if we want to have two separate logics for this error handling
-        })
-      )
+    const sub = this.placesService.loadAvailablePlaces()
       .subscribe({
         next: (places) => {
-          console.log(places);
           this.places.set(places);
         },
         complete: () => {
@@ -51,8 +38,7 @@ export class AvailablePlacesComponent implements OnInit {
   }
 
   onSelectPlace(place: Place) {
-    this.httpClient.put<UserPlaceDTO>('http://localhost:3000/user-places', {
-      placeId: place.id
-    }).subscribe();
+    this.placesService.addPlaceToUserPlaces(place)
+      .subscribe();
   }
 }

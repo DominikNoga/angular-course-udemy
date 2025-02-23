@@ -203,3 +203,6 @@ const baseUrlInterceptor: HttpInterceptorFn = (request, next) => {
 ````
 
 ### Response interceptors
+````ts
+
+````

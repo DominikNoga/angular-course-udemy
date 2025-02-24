@@ -104,3 +104,83 @@ They are similar to the properties abov. With their help we can apply custom sty
 - ng-touched
 - ng-dirty
 - ng-valid
+
+### Updating form programatically
+````ts
+class Form {
+  constructor() {
+    const storedUserData = localStorage.getItem(this.USER_DATA_KEY);
+    if (storedUserData) {
+      this.userData = JSON.parse(storedUserData);
+      console.log(this.userData);
+      // We need to set this timeout to wait for the next render cycle
+      setTimeout(() => {
+        this.loginForm().setValue({
+          email: this.userData?.email,
+          password: ''
+        });
+      }, 1);
+    }
+    afterNextRender(() => {
+      const sub = this.loginForm().valueChanges?.pipe(
+        debounceTime(500) // next function will run only after the user will stop typing for at least 500 ms, better for perf
+      ).subscribe({
+        next: (formData: UserData) => {
+          localStorage.setItem(this.USER_DATA_KEY, JSON.stringify({
+            email: formData.email
+          }))
+        }
+      });
+      this.destroyRef.onDestroy(() => sub?.unsubscribe());
+    });
+  }
+}
+````
+
+## Reactive forms
+Setting up the reactive form happens by initializing the FormGroup object. 
+Which is the same as the NgForm.form that we extracted when working with template driven forms.
+
+- In order to work with reactive form we need to import the <b>ReactiveFormsModule</b> into our component.
+- Improvement when using reactive forms is automatic proper type annotation for forms controls etc 
+- Just like with template driven forms we can add submit logic to the ngSubmit event.
+
+````ts
+@Component({
+  // ...
+  imports: [ReactiveFormsModule]
+})
+class ReactiveFormDemo {
+  // the same as the NgForm.form object
+  form = new FormGroup({
+    email: new FormControl(''), // one argument is initial value
+    password: new FormControl('')
+  });
+
+  onSubmit() {
+    // this will have type annotation.
+    this.form.value.email
+  }
+}
+````
+
+In order to let Angular know which form should we connect to this object.
+We need to connect both form tag and form controlles.
+
+````html
+<!-- Connecting the form object -->
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="control-row">
+        <div class="control no-margin">
+            <label for="email">Email</label>
+            <!-- Conntecting email field -->
+            <input id="email" type="email" formControlName="email" />
+        </div>
+
+        <div class="control no-margin">
+            <label for="password">Password</label>
+            <input id="password" type="password" formControlName="password" />
+        </div>
+    </div>
+</form>
+````

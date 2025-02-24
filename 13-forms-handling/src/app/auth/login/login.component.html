@@ -10,7 +10,8 @@
         name="email" 
         ngModel 
         required 
-        email 
+        email
+        #email="ngModel" 
       />
     </div>
 
@@ -23,9 +24,21 @@
         ngModel 
         required 
         minlength="6"
+        #password="ngModel"
       />
     </div>
 
     <button class="button">Login</button>
   </div>
+  @if (email.dirty && email.invalid) {
+    <p class="control-error">
+      Invalid email format.
+    </p>
+  }
+
+  @if (password.touched && password.dirty && password.invalid) {
+    <p class="control-error">
+      Wrong password. Must be 6 characters or more
+    </p>
+  }
 </form>

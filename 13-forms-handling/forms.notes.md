@@ -42,3 +42,65 @@ Which later will be used for form handling.
 ````
 
 ### Validation
+Validation happens, by combining attributes in html with the ts code.
+
+<b>IMPORTANT</b>: Just adding the attributes, does not prevent from the form submission, we need to handle this in the .ts file
+
+````html
+<div class="control no-margin">
+    <label for="email">Email</label>
+    <input 
+        id="email" 
+        type="email" 
+        name="email" 
+        ngModel 
+        required 
+        email 
+    />
+</div>
+````
+
+````ts
+ onSubmit(loginForm: NgForm) {
+    if (loginForm.invalid) {
+    //   If data is invalid (for example email was incorrect or required fields was not filled, error will be shown)
+      alert('Form is invalid');
+      return;
+    }
+    const {email, password} = loginForm.form.value;
+    this.userData = {
+      email,
+      password
+    };
+    console.log(this.userData);
+  }
+````
+
+#### Validation classes and properties
+We can read some validation props to decide which message should we display.
+In the example below. We show custom message for each form field.
+If user has typed any value inside and if this value is not valid.
+
+````html
+<div class="errors">
+     @if (email.touched && email.dirty && email.invalid) {
+        <p class="control-error">
+        Invalid email format.
+        </p>
+    }
+
+    @if (password.touched && password.dirty && password.invalid) {
+        <p class="control-error">
+        Wrong password. Must be 6 characters or more
+        </p>
+    }
+</div>
+````
+
+<b>CSS classes:</b> Angular also offers some css classes to show user the state of the form.
+They are similar to the properties abov. With their help we can apply custom styles for a given state
+
+- ng-invalid
+- ng-touched
+- ng-dirty
+- ng-valid

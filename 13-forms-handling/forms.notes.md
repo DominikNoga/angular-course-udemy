@@ -49,13 +49,13 @@ Validation happens, by combining attributes in html with the ts code.
 ````html
 <div class="control no-margin">
     <label for="email">Email</label>
-    <input 
-        id="email" 
-        type="email" 
-        name="email" 
-        ngModel 
-        required 
-        email 
+    <input
+        id="email"
+        type="email"
+        name="email"
+        ngModel
+        required
+        email
     />
 </div>
 ````
@@ -138,11 +138,11 @@ class Form {
 ````
 
 ## Reactive forms
-Setting up the reactive form happens by initializing the FormGroup object. 
+Setting up the reactive form happens by initializing the FormGroup object.
 Which is the same as the NgForm.form that we extracted when working with template driven forms.
 
 - In order to work with reactive form we need to import the <b>ReactiveFormsModule</b> into our component.
-- Improvement when using reactive forms is automatic proper type annotation for forms controls etc 
+- Improvement when using reactive forms is automatic proper type annotation for forms controls etc
 - Just like with template driven forms we can add submit logic to the ngSubmit event.
 
 ````ts
@@ -184,3 +184,8 @@ We need to connect both form tag and form controlles.
     </div>
 </form>
 ````
+
+### Validators
+
+#### Custom validators
+- More here -> https://angular.dev/guide/forms/form-validation#adding-custom-validators-to-template-driven-forms

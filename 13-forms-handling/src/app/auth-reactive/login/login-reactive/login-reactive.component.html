@@ -14,4 +14,17 @@
 
         <button class="button">Login</button>
     </div>
+
+    @if (isEmailInvalid) {
+        <p class="control-error">
+            Invalid email format.
+        </p>
+    }
+
+    @if (isPasswordInvalid) {
+        <p class="control-error">
+            Wrong password. Must be 6 characters or more.
+            And contain '?'
+        </p>
+    }
 </form>

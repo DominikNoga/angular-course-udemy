@@ -1,6 +1,6 @@
 import { inject, Injectable, signal } from '@angular/core';
 
-import { Place, UserPlaceDTO, UserPlacesResponse } from './place.model';
+import { Place, UserPlacesResponse } from './place.model';
 import { catchError, map, tap, throwError } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { ErrorService } from '../shared/error.service';

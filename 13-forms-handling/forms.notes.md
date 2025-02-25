@@ -1,4 +1,6 @@
 # Forms handling in Angular
+In depth guide: https://angular.dev/guide/forms
+
 There are 2 ways of handling forms in Angular
 
 - Template-driven forms
@@ -185,7 +187,260 @@ We need to connect both form tag and form controlles.
 </form>
 ````
 
-### Validators
+### Nested form groups
+For a better structure we might want to divide the main form group into more groups.
+It is better because:
+- the final 'value' object structure reflects the data more correctly
+- we can apply validation functions for the whole group
 
+````ts
+class SignupForm {
+  form = new FormGroup({
+    email: new FormControl('', {
+      validators: [Validators.required, Validators.email]
+    }),
+    passwords: new FormGroup({
+      password: new FormControl('', {
+        validators: [Validators.required, Validators.minLength(6)]
+      }),
+      repeatPassword: new FormControl('', {
+        validators: [Validators.required, Validators.minLength(6)]
+      })
+    })
+  });
+}
+````
+
+````html
+<!-- now in the template we can simply refer to the form group, and the sub form group -->
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <div class="control">
+    <label for="email">Email</label>
+    <input id="email" type="email" name="email" formControlName="email" />
+  </div>
+
+  <!-- We are passing sub-from group name -->
+  <div class="control-row" formGroupName="passwords">
+    <div class="control">
+      <label for="password">Password</label>
+      <input
+        id="password"
+        type="password"
+        name="password"
+        formControlName="password"
+      />
+    </div>
+
+    <div class="control">
+      <label for="confirm-password">Confirm Password</label>
+      <input
+        id="confirm-password"
+        type="password"
+        name="confirm-password"
+        formControlName="repeatPassword"
+      />
+    </div>
+  </div>
+</form>
+````
+
+### Validators
+Validator is simply a function which checks for some properties on the formControl object.
+There are a plenty of built-in validators. They are part of the Validators object,
+which is imported from @angular/forms.
+
+````ts
+export class LoginReactiveComponent implements OnInit {
+  form = new FormGroup({
+    email: new FormControl('', {
+      validators: [
+        // We are passing validator functions in the array
+        Validators.email,
+        Validators.required
+      ]
+    }),
+    password: new FormControl('', {
+      validators: [
+        Validators.required,
+        Validators.minLength(6)
+      ]
+    })
+  });
+}
+````
 #### Custom validators
-- More here -> https://angular.dev/guide/forms/form-validation#adding-custom-validators-to-template-driven-forms
+- custom validator for td forms -> https://angular.dev/guide/forms/form-validation#adding-custom-validators-to-template-driven-forms
+
+For reactive forms we can easily create validators as a normal js functions.
+As the argument they are taking the formControl. And they need to return either 'null' which means no error.
+Or Object with some kind of info what error it is:
+````ts
+const validator = (ctrl: AbstractControl) => {
+  if (ctrl.invalid) {
+    return {
+      someError: true
+    };
+  }
+
+  return null;
+}
+````
+There are several types of validators:
+- One specific field validator -> We are checking this given control
+````ts
+const notNullValidator = (ctrl: AbstractControl) => {
+  if (_.isNil(ctrl)) {
+    return {
+      isNull: true
+    };
+  }
+  return null;
+}
+````
+- Factory function validator -> It allows to take the argument like the built-in min-length validator.
+This kind of validator needs to return the validator function, explained above.
+````ts
+const customMinLength = (minLength: number): ValidatorFn => 
+  (ctrl: AbstractControl) => {
+    if (ctrl.value.length < minLength) {
+      return {
+        toShort: true
+      };
+    }
+    return null;
+}
+````
+- FormGroup validator -> This is a benefit for dividing the form into smaller groups.
+We can for example validate the password group for the password match.
+
+````ts
+// Here we connect factory validator with the group validator
+const controlsMatch = (controlName1: string, controlName2: string): ValidatorFn => 
+    (control: AbstractControl) => {
+      // The control passed here refers to the whole 'passwords' group
+        // Ts does not know to which group it is applied so we need to get those controls by names
+        const password = control.get(controlName1)?.value;
+        const repeatPassword = control.get(controlName2)?.value;
+        if (password && repeatPassword && password !== repeatPassword) {
+            return { passwordsDoesNotMatch: true };
+        }
+        return null;
+    };
+class From {
+  form = new FormGroup({
+    email: new FormControl('', {
+      validators: [Validators.required, Validators.email]
+    }),
+    passwords: new FormGroup({
+      password: new FormControl('', {
+        validators: [Validators.required, Validators.minLength(6)]
+      }),
+      repeatPassword: new FormControl('', {
+        validators: [Validators.required, Validators.minLength(6)]
+      })
+    }, {
+      // Passing validator to the whole group
+      validators: [controlsMatch('password', 'repeatPassword')]
+    })
+  });
+}
+````
+
+#### Async validators
+We can pass or create asnyc validator which can make the calls to the api in order for validating the data.
+For example for email input we can ask db is this email currently in the database? Or any other prop like 'username' 
+We are passing those validators like the sync one, to the separate array.
+````ts
+// Here we are making a more generic validator for both email and username
+const propertyExists = (propName: 'email' | 'username'): AsyncValidatorFn => 
+    (control: AbstractControl) => {
+        return this.httpClient.get<{exists: boolean}>(`api/${propName}/exists?${propName}=${control.value}`).pipe(
+          // Wait until user stops typing
+          debounceTime(500),
+          // Map the api response to the 
+          map((response: {exists: boolean}) => response.exists ? {emailTaken: true} : null ),
+          catchError(() => of(null))
+        );
+    }
+
+export class LoginReactiveComponent implements OnInit {
+  form = new FormGroup({
+    email: new FormControl('', {
+      validators: [
+        Validators.email,
+        Validators.required
+      ],
+      asyncValidators: [
+        propertyExists('email')
+      ]
+    })
+  });
+}
+````
+
+### Form array
+We can define few values without giving them some custom names and moving them to separate group,
+nice for set of checkboxes.
+
+````ts
+export class SignupComponent {
+  form = new FormGroup({
+    email: new FormControl('', {
+      validators: [Validators.required, Validators.email]
+    })
+    howFound: new FormArray([
+      new FormControl(false),
+      new FormControl(false),
+      new FormControl(false)
+    ])
+  });
+}
+````
+
+````html
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <div class="control">
+    <label for="email">Email</label>
+    <input id="email" type="email" name="email" formControlName="email" />
+  </div>
+
+   <!-- Here we pass an array --> 
+  <fieldset formArrayName="howFound">
+    <legend>How did you find us?</legend>
+    <div class="control">
+      <!-- Form ctrl name is an index of the input -->
+      <input
+        type="checkbox"
+        id="google"
+        name="acquisition"
+        value="google"
+
+        formControlName="0"
+      />
+      <label for="google">Google</label>
+    </div>
+
+    <div class="control">
+      <input
+        type="checkbox"
+        id="friend"
+        name="acquisition"
+        value="friend"
+        formControlName="1"
+      />
+      <label for="friend">Referred by friend</label>
+    </div>
+
+    <div class="control">
+      <input
+        type="checkbox"
+        id="other"
+        name="acquisition"
+        value="other"
+        formControlName="2"
+      />
+      <label for="other">Other</label>
+    </div>
+  </fieldset>
+</form>
+````

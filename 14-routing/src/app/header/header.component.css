@@ -23,6 +23,10 @@ img {
   object-fit: contain;
 }
 
+img:hover {
+  cursor: pointer;
+}
+
 h1 {
   font-size: 1.25rem;
   margin: 0;

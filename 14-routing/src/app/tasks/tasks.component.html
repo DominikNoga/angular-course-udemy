@@ -1,5 +1,9 @@
+<p>
+  <a routerLink="./" [queryParams]="queryParams">sort tasks</a>
+</p>
+
 <ul>
-  @for (task of userTasks; track task.id) {
+  @for (task of userTasks(); track task.id) {
     <li>
       <app-task [task]="task" />
     </li>

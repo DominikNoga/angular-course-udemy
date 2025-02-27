@@ -2,7 +2,7 @@ import { Component, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { TasksService } from '../tasks.service';
-import { Router, RouterLink } from '@angular/router';
+import { CanDeactivateFn, Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-new-task',
@@ -16,6 +16,7 @@ export class NewTaskComponent {
   enteredTitle = signal('');
   enteredSummary = signal('');
   enteredDate = signal('');
+  submitted = false;
   private router = inject(Router);
   private tasksService = inject(TasksService);
 
@@ -29,8 +30,17 @@ export class NewTaskComponent {
       this.userId()
     );
 
+    this.submitted = true;
     this.router.navigate(['users', this.userId(), 'tasks'], {
       replaceUrl: true // make sure it works as the redirect, in order to prevent going back to the same page
     });
   }
+}
+
+export const canLeaveNewTaskPage: CanDeactivateFn<NewTaskComponent> = (component: NewTaskComponent) => {
+  if (component.submitted) return true;
+  if (component.enteredDate() || component.enteredSummary() || component.enteredTitle()) {
+    return window.confirm('Are tou sure you want to leave? You will loose all the data');
+  }
+  return true;
 }

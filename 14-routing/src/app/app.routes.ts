@@ -2,7 +2,8 @@ import { Route } from "@angular/router";
 import { NoTaskComponent } from "./tasks/no-task/no-task.component";
 import { UserTasksComponent } from "./users/user-tasks/user-tasks.component";
 import { NotFoundComponent } from "./not-found/not-found/not-found.component";
-import { userRoutes } from "./users/users.routes";
+import { resolveTitle, resolveUsername } from "./users/users.resolvers";
+import { canMatchUserRoutes } from "./app.routes.guards";
 
 export const routes: Route[] = [
     {
@@ -12,7 +13,13 @@ export const routes: Route[] = [
     {
         path: 'users/:userId',
         component: UserTasksComponent,
-        children: userRoutes
+        loadChildren: () => import('../app/users/users.routes')
+            .then(m => m.userRoutes),
+        resolve: {
+            username: resolveUsername
+        },
+        title: resolveTitle,
+        canMatch: [canMatchUserRoutes]
     },
     {
         path: '**',

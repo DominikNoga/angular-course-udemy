@@ -1,5 +1,5 @@
 <p>
-  <a routerLink="./" [queryParams]="queryParams">sort tasks</a>
+  <a routerLink="./" [queryParams]="{order: order() === 'asc' ? 'desc' : 'asc'}">sort tasks {{ getOppositeOrder() }}</a>
 </p>
 
 <ul>

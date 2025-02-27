@@ -295,6 +295,242 @@ It is just the key value pairs where key would be 'sort' and value 'asc' or 'des
 
 ````html
 <p>
-  <a routerLink="./" [queryParams]="queryParams">sort tasks</a>
+  <a routerLink="./" [queryParams]="{order: 'asc'}">sort tasks</a>
 </p>
 ````
+
+In order to get this param we are using similar approach as with route params
+````ts
+class TasksList {
+  // Same config as before must be applied
+  order = input<SortOrder>();
+  activatedRoute = inject(ActivatedRoute);
+  order?: 'asc' | 'desc';
+
+  ngOnInit() {
+    activatedRoute.queryParams.subscribe({
+      next: (params) => {
+        this.order = params['order']
+      }
+    })
+  }
+}
+````
+
+### Static data to routes
+We can pass some data to the routes. Like always we can access them either with input or with activated route
+It can be used for:
+- Passing some metadata like page title
+- Setting role based access
+- Passing api urls, and other stuff
+
+````ts
+export const routes: Route[] = [
+  {
+      path: '',
+      component: NoTaskComponent,
+      data: {
+        title: 'Home',
+        roles: ['all']
+      }
+  },
+  {
+      path: 'users/:userId',
+      component: UserTasksComponent,
+      children: userRoutes,
+      data: {
+        title: 'Users',
+        roles: ['admin']
+      }
+  }
+] as const;
+
+````
+
+### Dynamic data to routes (Resolvers)
+Handle fetching and dynamic data in routes to keep components lean and clean.
+Similar to static data fetching. But we use resolve property and pass a resolver function there.
+
+````ts
+// Defining the resolver function
+export const resolveUsername: ResolveFn<string> = (activatedRoute: ActivatedRouteSnapshot, routerState: RouterStateSnapshot) => {
+    const usersService = inject(UsersService);
+    const userId = activatedRoute.paramMap.get('userId');
+    return usersService.users.find(user => user.id === userId)?.name || 'No user found';
+};
+// Passing this to the route
+const routes = [
+  // ...
+  {
+    path: 'users/:id',
+    /*
+      Configures when it will re-run
+        always : Run on every execution.
+        paramsChange: just route params change
+        pathParamsChange : Rerun guards and resolvers when the path params change. This does not compare matrix or query parameters.
+        paramsOrQueryParamsChange : Run when path, matrix, or query parameters change.
+        pathParamsOrQueryParamsChange : Rerun guards and resolvers when the path params change or query params have changed. This does not include matrix parameters.
+    */
+    runGuardsAndResolvers: 'paramsOrQueryParamsChange',
+    resolve: {
+      username: resolveUsername
+    }
+  }
+]
+// Accessing this data in the component file
+class Test {
+  // Using input
+  username = input();
+  // using observables
+  ngOnInit() {
+    // It gives access both to resolved data and 
+    this.activatedRoute.data.subscribe({
+      next: (data) => {
+        const username = data.username;
+      }
+    })
+  }
+}
+````
+
+### Updating page title with routes
+We can adjust the title of our web page (the one showed on the browser card). For SEO reasons.
+It can be either:
+- static
+````ts
+const routes: Route[] = [
+  {
+    path: '',
+    // ...
+    title: 'EasyTask - Home'
+  }
+]
+````
+- dynamic
+````ts
+// We are passing a resolver to the title property
+export const resolveTitle: ResolveFn<string> = (activatedRoute: ActivatedRouteSnapshot, routerState: RouterStateSnapshot) => {
+    return `${user.username}'s Tasks`;
+};
+
+const routes: Route[] = [
+  {
+    path: '',
+    // ...
+    title: resolveTitle
+  }
+]
+````
+
+### Route guards
+Mechanism allowing to check wether navigating to specific route should be permitted or not.
+They are applied with 'can' prefix. And they are added using functions nowdays, or classes back then.
+
+````ts
+const routes: Route[] = [
+  {
+    path: 'users/:userId',
+    // ...
+    canActivate: , // It is similar to match, but used before the component is loaded 
+    canActivateChild:, // If we wanna activate this route and not it's child routes
+    canDeactivate: , // Can user leave the current page?
+    canMatch: [canMatchFn] // Most versatile guard -> decides wether the path passed to the url can be matched, more modern
+  }
+]
+````
+
+#### Creating the guard
+````ts
+// CanMatch
+export const canMatchUserRoutes: CanMatchFn = (route: Route, segments: UrlSegment[]) => {
+  const router = inject(Router);
+  const userId = segments[1].path;
+  const usersService = inject(UsersService);
+  if (usersService.users.some(user => user.id === userId)) {
+    // Let the user in: return true / obesvable(true)
+    return true;
+  }
+
+  // if user cannot access this route, redirect him / stay on this route / return an observable
+  return new RedirectCommand(router.parseUrl('/unauthorized'));
+};
+
+// CanDeactivate
+export const canLeaveNewTaskPage: CanDeactivateFn<NewTaskComponent> = (component: NewTaskComponent) => {
+  if (component.enteredDate() || component.enteredSummary() || component.enteredTitle()) {
+    return window.confirm('Are tou sure you want to leave? You will loose all the data');
+  }
+  return true;
+}
+````
+
+### Programatic reload
+If we want to update some data, and we need a reload. This is how we do it.
+
+````ts
+class TaskComponent {
+  onComplete() {
+    this.tasksService.removeTask(this.task().id);
+    this.router.navigate(['./'], {
+      relativeTo: this.activatedRoute, // thanks to that './' will be relative to the current route
+      onSameUrlNavigation: 'reload', // we will mimic the reload behaviour but without really reloading the page
+      queryParamsHandling: 'preserve' // query params won't get removed
+    });
+  }
+}
+````
+
+## Lazy loading
+What is it?
+
+We are building the app in a way, that the code is only loaded and executed when it is really needed.
+It leads to:
+- smaller initial bundle size -> Hence app will load faster and work quicker
+- also it does not load code that won't be used by some user. For example guest user won't ever need 'admin' page to be loaded
+
+### Lazy loaded routes
+Loads page only if a user will enter this page.
+In order to use lazy loading instead of eager loading.
+We need to use import key word as a function. Everything imported using typical syntax won't be loaded in a lazy way.
+So any resolvers or stuff like that has to be kept in other place than the component if we want to use it in routes file.
+
+<b>Warning:</b> should't be applied to each route without thinking. For example the home page will probably
+be visited by every user, so it is better to load it right away
+
+````ts
+export const userRoutes: Routes = [
+  // 
+  {
+    path: '',
+    component: NoTaskComponent
+  },
+  {
+    path: 'tasks',
+    loadComponent: () => import('../tasks/tasks.component')
+        .then(module => module.TasksComponent),
+    runGuardsAndResolvers: 'always',
+    resolve: {
+      userTasks: userTasksResolver
+    }
+  }
+];
+````
+
+#### Load route group lazily
+We are using loadChildren instead of children and we can remove all lazy loading from child routes
+````ts
+export const routes: Route[] = [
+    {
+        path: '',
+        component: NoTaskComponent
+    },
+    {
+        path: 'users/:userId',
+        component: UserTasksComponent,
+        loadChildren: () => import('../app/users/users.routes')
+            .then(m => m.userRoutes)
+    }
+] as const;
+````
+
+### Defferable views

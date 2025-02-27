@@ -1,6 +1,7 @@
 import { Routes } from "@angular/router";
 import { TasksComponent } from "../tasks/tasks.component";
-import { NewTaskComponent } from "../tasks/new-task/new-task.component";
+import { canLeaveNewTaskPage, NewTaskComponent } from "../tasks/new-task/new-task.component";
+import { userTasksResolver } from "./users.resolvers";
 
 export const userRoutes: Routes = [
     {
@@ -11,10 +12,15 @@ export const userRoutes: Routes = [
     {
         // it will be automatically concatenated with users/userId
         path: 'tasks',
-        component: TasksComponent
+        component: TasksComponent,
+        runGuardsAndResolvers: 'always',
+        resolve: {
+            userTasks: userTasksResolver
+        }
     },
     {
         path: 'tasks/new',
-        component: NewTaskComponent
+        component: NewTaskComponent,
+        canDeactivate: [canLeaveNewTaskPage]
     }
 ];

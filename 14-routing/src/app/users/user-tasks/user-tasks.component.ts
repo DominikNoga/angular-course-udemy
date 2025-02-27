@@ -9,23 +9,7 @@ import { ActivatedRoute, RouterLink, RouterOutlet } from '@angular/router';
   styleUrl: './user-tasks.component.css',
   imports: [RouterOutlet, RouterLink]
 })
-export class UserTasksComponent implements OnInit {
+export class UserTasksComponent {
   userId = input.required<string>();
-  private usersService = inject(UsersService);
-  private activatedRoute = inject(ActivatedRoute);
-  private destroyRef = inject(DestroyRef);
-
-  userName = computed(
-    () => this.usersService.users.find(user => user.id === this.userId())?.name
-  );
-
-  ngOnInit(): void {
-    console.log(this.activatedRoute);
-    const sub = this.activatedRoute.paramMap.subscribe({
-      next: paramMap => {
-        const userId = paramMap.get('userId');
-      }
-    });
-    this.destroyRef.onDestroy(() => sub.unsubscribe());
-  }
+  username = input.required<string>();
 }

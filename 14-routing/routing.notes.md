@@ -533,4 +533,36 @@ export const routes: Route[] = [
 ] as const;
 ````
 
+### Lazy loading services
+When we are providing service in 'root'. The service is loaded eagerly.
+We can change it, and load it lazily.
+
+In order to load a service lazily we need to remove 'in root' from @Injectable directive.
+And add it to providers array in the lazy loaded route group.
+
+<b>Important!</b><br/>
+The service is not lazy loaded because of providing it for whole route group.
+It is loaded lazily because the whole route group is lazy loaded.
+
+````ts
+export const userRoutes: Routes = [
+    {
+      // this path is used as a wrapper for all routes
+        path: '',
+        // Task service is provided for the whole route group
+        providers: [TasksService],
+        children: [
+            {
+                path: '',
+                redirectTo: 'tasks'
+            },
+            {
+                path: 'tasks',
+                component: TasksComponent,
+            }
+        ]
+    }
+];
+````
+
 ### Defferable views
